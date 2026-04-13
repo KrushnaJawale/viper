@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Visual Intercept & Precision Engagement Response</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --bg-dark: #0b0e0f;
+      --panel-dark: #15191b;
+      --accent-green: #ffffff;
+      --accent-dim: #008f23;
+      --danger: #ff4d4d;
+      --warning: #ffcc00;
+      --text-main: #e0e0e0;
+      --text-dim: #a0a0a0;
+      --border: #2d3436;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: var(--bg-dark);
+      color: var(--text-main);
+      font-family: 'Inter', sans-serif;
+      overflow-x: hidden;
+      overflow-y: auto;
+    }
+
+    /* ════════════════════ HEADER ════════════════════ */
+    #header {
+      background: #444444;
+      padding: 0.8rem 1.5rem;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    #header .logo {
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: var(--accent-green);
+      letter-spacing: 2px;
+    }
+
+    #header .logo span {
+      color: var(--text-main);
+      opacity: 0.5;
+      font-weight: 400;
+    }
+
+    #header .status-bar {
+      display: flex;
+      gap: 20px;
+      font-size: 0.75rem;
+      color: var(--text-dim);
+    }
+
+    #sys-time {
+      color: var(--accent-green);
+      font-weight: bold;
+    }
+
+    /* ════════════════════ ALERT ════════════════════ */
+    #alert-banner {
+      background: var(--danger);
+      color: white;
+      text-align: center;
+      font-weight: bold;
+      height: 0;
+      overflow: hidden;
+      transition: height 0.3s ease;
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      letter-spacing: 1px;
+    }
+
+    #alert-banner.active {
+      height: 35px;
+    }
+
+    /* ════════════════════ MAIN LAYOUT ════════════════════ */
+    #main {
+      display: grid;
+      grid-template-columns: 1fr 360px 1fr;
+      gap: 15px;
+      padding: 15px;
+      max-width: 1600px;
+      margin: 0 auto;
+      transition: top 0.3s ease;
+    }
+
+    /* MOBILE RESPONSIVE */
+    @media (max-width: 1150px) {
+      #main {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    @media (max-width: 800px) {
+      #main {
+        grid-template-columns: 1fr;
+      }
+
+      #header {
+        justify-content: center;
+        gap: 10px;
+        text-align: center;
+      }
+    }
+
+    .panel {
+      background: var(--panel-dark);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .panel-title {
+      background: #1c2124;
+      padding: 10px 15px;
+      font-weight: 600;
+      font-size: 0.75rem;
+      color: var(--accent-green);
+      border-bottom: 1px solid var(--border);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .tag {
+      font-size: 0.65rem;
+      padding: 1px 6px;
+      border: 1px solid var(--accent-dim);
+      color: var(--accent-green);
+      border-radius: 2px;
+    }
+
+    /* ════════════════════ CAMERA ════════════════════ */
+    #cam-wrap {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 4/3;
+      background: #000;
+    }
+
+    #cam-feed {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0.8;
+    }
+
+    #reticle {
+      position: absolute;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      display: none;
+    }
+
+    #reticle.visible {
+      display: block;
+    }
+
+    .cam-hud {
+      position: absolute;
+      padding: 8px;
+      font-size: 0.7rem;
+      color: var(--accent-green);
+      background: rgba(0, 0, 0, 0.6);
+    }
+
+    .botleft {
+      bottom: 0;
+      left: 0;
+    }
+
+    .botright {
+      bottom: 0;
+      right: 0;
+    }
+
+    /* ════════════════════ RADAR ════════════════════ */
+    #radar-wrap {
+      width: 260px;
+      height: 260px;
+      margin: 20px auto;
+      border-radius: 50%;
+      border: 1px solid var(--accent-dim);
+      position: relative;
+      background: radial-gradient(circle, #151d16 0%, #0b0e0f 100%);
+    }
+
+    .radar-ring {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      border: 1px solid rgba(0, 255, 65, 0.1);
+      border-radius: 50%;
+    }
+
+    .radar-ring:nth-child(1) {
+      width: 33%;
+      height: 33%;
+    }
+
+    .radar-ring:nth-child(2) {
+      width: 66%;
+      height: 66%;
+    }
+
+    .radar-ring:nth-child(3) {
+      width: 95%;
+      height: 95%;
+    }
+
+    #jet-blip {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      background: var(--danger);
+      border-radius: 50%;
+      display: none;
+      transform: translate(-50%, -50%);
+      box-shadow: 0 0 10px var(--danger);
+    }
+
+    #jet-blip.visible {
+      display: block;
+    }
+
+    /* ════════════════════ DATA ════════════════════ */
+    .telem-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 15px;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.85rem;
+    }
+
+    .label {
+      color: var(--text-dim);
+      text-transform: uppercase;
+      font-size: 0.7rem;
+    }
+
+    .value {
+      font-weight: 600;
+      color: var(--accent-green);
+    }
+
+    .value.hot {
+      color: var(--danger);
+    }
+
+    #conf-bar-wrap {
+      padding: 15px;
+    }
+
+    #conf-bar-track {
+      width: 100%;
+      height: 6px;
+      background: #000;
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    #conf-bar-fill {
+      height: 100%;
+      width: 0%;
+      background: var(--accent-dim);
+      transition: width 0.3s;
+    }
+
+    #conf-bar-fill.danger {
+      background: var(--danger);
+    }
+
+    #status-indicator {
+      margin: 15px;
+      padding: 10px;
+      border-radius: 3px;
+      background: #000;
+      text-align: center;
+      font-weight: 600;
+      font-size: 0.8rem;
+      border: 1px solid var(--border);
+    }
+
+    #status-indicator.locked {
+      color: var(--danger);
+      border-color: var(--danger);
+      background: rgba(255, 77, 77, 0.05);
+    }
+
+    /* ════════════════════ WEAPON ════════════════════ */
+    #weapon-area {
+      position: relative;
+      min-height: 280px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #gun-sleep,
+    #gun-fire {
+      width: 75%;
+      max-width: 320px;
+      transition: opacity 0.2s;
+      filter: grayscale(0.5) brightness(0.8);
+    }
+
+    #gun-fire {
+      position: absolute;
+      opacity: 0;
+      filter: none;
+    }
+
+    body.fire-mode #gun-fire {
+      opacity: 1;
+    }
+
+    body.fire-mode #gun-sleep {
+      opacity: 0;
+    }
+
+    #gun-status-label {
+      font-size: 0.7rem;
+      margin-bottom: 15px;
+      color: var(--text-dim);
+      font-weight: bold;
+    }
+
+    #gun-status-label.active {
+      color: var(--danger);
+    }
+
+    /* Hidden decos for clean UI */
+    #muzzle-flash,
+    #bullet-beam,
+    #gun-flames {
+      display: none;
+    }
+
+    #ammo-data {
+      display: flex;
+      width: 100%;
+      justify-content: space-around;
+      padding: 12px;
+      border-top: 1px solid var(--border);
+      font-size: 0.75rem;
+      color: var(--text-dim);
+    }
+
+    #ammo-data span {
+      color: var(--accent-green);
+      font-weight: bold;
+    }
+
+    /* ════════════════════ FOOTER ════════════════════ */
+    #footer {
+      background: #000;
+      border-top: 1px solid var(--border);
+      padding: 8px 15px;
+      font-size: 0.7rem;
+      color: var(--text-dim);
+      display: flex;
+      justify-content: space-between;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div id="header">
+    <div class="logo">VIPER</div>
+    <div class="status-bar">
+      <span id="sys-time">00:00:00</span>
+    </div>
+    <div class="status-bar">
+      <span>LOC: 33.70N / 72.40E</span>
+    </div>
+  </div>
+
+  <div id="alert-banner">⚠ HOSTILE TARGET IDENTIFIED — WEAPONS FREE ⚠</div>
+
+  <div id="main">
+
+    <div class="panel">
+      <div class="panel-title">Optical Imaging <span class="tag">Live Feed</span></div>
+      <div id="cam-wrap">
+        <img id="cam-feed" src="{{ url_for('video_feed') }}" alt="Live feed" />
+        <div id="reticle">
+          <svg width="60" height="60" viewBox="0 0 60 60">
+            <circle cx="30" cy="30" r="25" stroke="red" stroke-width="1.5" fill="none" stroke-dasharray="4,4" />
+            <line x1="30" y1="5" x2="30" y2="15" stroke="red" stroke-width="2" />
+            <line x1="30" y1="45" x2="30" y2="55" stroke="red" stroke-width="2" />
+            <line x1="5" y1="30" x2="15" y2="30" stroke="red" stroke-width="2" />
+            <line x1="45" y1="30" x2="55" y2="30" stroke="red" stroke-width="2" />
+          </svg>
+        </div>
+        <div class="cam-hud botleft">ID: <span id="cam-target-id">NONE</span></div>
+        <div class="cam-hud botright">CONF: <span id="cam-conf">0.0</span>%</div>
+      </div>
+    </div>
+
+    <div id="center-col">
+      <div class="panel">
+        <div class="panel-title">Radar Telemetry</div>
+        <div id="radar-wrap">
+          <div class="radar-ring"></div>
+          <div class="radar-ring"></div>
+          <div class="radar-ring"></div>
+          <div id="jet-blip"></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-title">System Data</div>
+        <div class="telem-row"><span class="label">Status</span><span class="value" id="tgt-status">IDLE</span></div>
+        <div class="telem-row"><span class="label">X-Coord</span><span class="value" id="tgt-x">---</span></div>
+        <div class="telem-row"><span class="label">Y-Coord</span><span class="value" id="tgt-y">---</span></div>
+        <div class="telem-row"><span class="label">Threat</span><span class="value" id="tgt-threat">LOW</span></div>
+        <div id="conf-bar-wrap">
+          <div style="font-size:0.6rem; color:var(--text-dim); margin-bottom:5px;">DETECTION CONFIDENCE</div>
+          <div id="conf-bar-track">
+            <div id="conf-bar-fill"></div>
+          </div>
+        </div>
+        <div id="status-indicator">SCANNING...</div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">MG-99 Defense Unit <span class="tag" id="weapon-tag">STANDBY</span></div>
+      <div id="weapon-area">
+        <img id="gun-sleep" src="{{ url_for('static', filename='gun_inactive.png') }}" />
+        <img id="gun-fire" src="{{ url_for('static', filename='gun_active.png') }}" />
+        <div id="ammo-data">
+          <div>AMMO: <span>∞</span></div>
+          <div>Visual Intercept & Precision Engagement Response</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+
+  <script>
+    function updateClock() {
+      document.getElementById('sys-time').textContent = new Date().toTimeString().slice(0, 8);
+    }
+    setInterval(updateClock, 1000);
+
+    const reticle = document.getElementById('reticle');
+    const jetBlip = document.getElementById('jet-blip');
+    const alertBanner = document.getElementById('alert-banner');
+
+    setInterval(() => {
+      fetch('/get_coords')
+        .then(r => r.json())
+        .then(data => updateUI(data))
+        .catch(() => { });
+    }, 100);
+
+    function updateUI(data) {
+      const detected = data.detected;
+      const conf = data.conf || 0;
+      const x = data.x || 0;
+      const y = data.y || 0;
+
+      const active = detected && conf >= 30;
+      const fireMode = detected && conf >= 50;
+      const threatMode = active && !fireMode;
+
+      document.body.classList.toggle('fire-mode', fireMode);
+      alertBanner.classList.toggle('active', active);
+
+      document.getElementById('conf-bar-fill').style.width = conf + '%';
+      document.getElementById('conf-bar-fill').classList.toggle('danger', conf >= 50);
+      document.getElementById('cam-conf').textContent = conf.toFixed(1);
+      document.getElementById('cam-target-id').textContent = active ? 'TGT-01' : 'NONE';
+
+      if (active) {
+        const feed = document.getElementById('cam-feed');
+        const rect = feed.getBoundingClientRect();
+        reticle.style.left = ((x / 640) * rect.width) + 'px';
+        reticle.style.top = ((y / 480) * rect.height) + 'px';
+        reticle.classList.add('visible');
+
+        const radar = document.getElementById('radar-wrap');
+        jetBlip.style.left = (((x / 640) * 0.8) + 0.1) * radar.offsetWidth + 'px';
+        jetBlip.style.top = (((y / 480) * 0.8) + 0.1) * radar.offsetHeight + 'px';
+        jetBlip.classList.add('visible');
+      } else {
+        reticle.classList.remove('visible');
+        jetBlip.classList.remove('visible');
+      }
+
+      document.getElementById('tgt-status').textContent = fireMode ? 'ENGAGED' : (active ? 'TRACKING' : 'IDLE');
+      document.getElementById('tgt-status').className = 'value' + (active ? ' hot' : '');
+      document.getElementById('tgt-x').textContent = active ? x : '---';
+      document.getElementById('tgt-y').textContent = active ? y : '---';
+      document.getElementById('tgt-threat').textContent = conf > 70 ? 'CRITICAL' : (conf > 50 ? 'HIGH' : 'LOW');
+
+      const si = document.getElementById('status-indicator');
+      si.textContent = fireMode ? 'FIRE AT WILL' : (threatMode ? 'TARGET LOCKED' : 'ALL CLEAR');
+      si.classList.toggle('locked', active);
+
+      const weaponTag = document.getElementById('weapon-tag');
+      const gunLabel = document.getElementById('gun-status-label');
+      if (fireMode) {
+        weaponTag.textContent = 'FIRING';
+        gunLabel.textContent = 'WEAPONS LIVE';
+        gunLabel.classList.add('active');
+      } else {
+        weaponTag.textContent = active ? 'TRACKING' : 'READY';
+        gunLabel.textContent = active ? 'AWAITING LOCK' : 'TURRET IDLE';
+        gunLabel.classList.remove('active');
+      }
+    }
+  </script>
+</body>
+
+</html>
